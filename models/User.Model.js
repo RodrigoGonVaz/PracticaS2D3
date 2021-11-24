@@ -5,7 +5,15 @@ const mongoose	= require("mongoose")
 // REQUISITOS PARA CREAR UN USER
 const userSchema = mongoose.Schema({
 	username: String,
-	email: String,
+	email: {
+        type: String,
+        // En caso si ni hay email manda mensaje
+        require: [true, "email es requerido"],
+		match: [/^\S+@\S+\.\S+$/, "Por favor, ingresa un email válido."], // REGEX DEL EMAIL
+		unique: true, // EMAIL ÚNICO EN LA BASE DE DATOS
+		lowercase: true, // MINÚSCULAS
+		trim: true // SIN ESPACIOS VACÍOS
+    },
 	passwordEncriptado: String,
 },
 {timestamps:true})// ESTABLECER LA FECHA EN LA CUAL FUE CREADO
