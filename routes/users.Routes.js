@@ -10,7 +10,5 @@ const usersController    =require("./../controllers/users.Controller")
 router.get("/", usersController.register)
 
 
-
-
 // 3. Exportaciones
 module.exports = router
