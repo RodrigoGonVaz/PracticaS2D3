@@ -58,7 +58,7 @@ try {
         passwordEncriptado
     })
         console.log(newUser)
-        res.redirect("/")
+        res.redirect("/auth/login")
 
  } catch(error){
     res.status(500).render("auth/signup", { //Error en la base de datos
@@ -67,4 +67,89 @@ try {
  }
 }
 
+//----------------------LOG IN----------------------
+exports.viewLogin = (req, res) => {
+	res.render("auth/login")
+}
 
+exports.login = async(req, res) => {
+	
+    try {
+
+        //1. OBTENCION DE DATOS DEL FORM
+        const email = req.body.email
+        const password = req.body.password
+    
+            console.log(email, password)
+
+        //2. VALIDACION DE USUARIO ENCONTRADO EN BD
+        const foundUser = await User.findOne({ email })
+        console.log(foundUser) // <-- Manda todos los datos del usuario (objeto)
+        if(!foundUser){
+            res.render("auth/login", {
+                errorMessage: "Email o contraseña sin coincidencia. 🥪 "
+            })
+            return
+        }
+
+        //3. VALIDACION DE CONTRASEÑA
+        //COMPRAR LA CONTRASEÑA DEL FORMULARIO vs.. LA BD
+        //toma las dos contraseñas form y bd y los compara <---compareSync regresa un true o false
+        const verifiedPass = await bcryptjs.compareSync(password, foundUser.passwordEncriptado)
+        if (!verifiedPass) {
+            res.render("auth/login",{
+                errorMessage: "Email o contraseña erronea"
+            })
+            return
+        
+        }
+        // console.log("password", password)
+	    // console.log("foundUser.password:", foundUser.passwordEncriptado)
+	    // console.log("verifiedPass", verifiedPass) //<---- true
+
+        //4. GENERAR LA SESION - DESDE EL SERVIDOR MANDAMOS COOKIE (ARCHIVO QUE CONTIENE LA INFO DEL USUARIO)
+        //PERSISTENCIA DE IDENTIDAD - TITULA DE CIERTAS AREAS PRIVADAS
+        req.session.currentUser = {
+            _id: foundUser._id,
+            username: foundUser.username,
+            email: foundUser.email,
+            mensaje: "Lo logramos YEIIII"
+        }
+        //CARPETA DE SESSION EN MONGODB
+        /*_id: "FqiCmtZZVqgqOPP17ih0bqEtLB0mlomP"
+        expires: 2021-11-26T17:19:54.341+00:00
+        Datesession: {
+            "cookie":{
+                "originalMaxAge":86400000,
+                "expires":"2021-11-26T17:19:54.341Z",
+                "httpOnly":true,
+                "path":"/"
+            },
+            "currentUser":{
+                "_id":"619fb7d41d0338638c1c1580",
+                "username":"HolaMundo",
+                "email":"iron@iron.com",
+                "mensaje":"Lo logramos YEIIII"}}*/
+        
+        //5. REDIRECCIONAR AL HOME
+        res.redirect("/users/profile")
+
+
+        
+    } catch (error){
+        console.log(error)
+    }
+}
+
+//--------------------------LOGOUT------------------------
+//Session en MONGO DB no aparece
+exports.logout = async(req,res) =>{
+    req.session.destroy((error) =>{
+        //Se evalua so Hubo un error al borrar la cookie
+        if (error) {
+            console.log(error)
+            return
+        }
+        res.redirect("/")
+    })
+}

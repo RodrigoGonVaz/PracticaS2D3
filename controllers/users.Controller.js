@@ -1,5 +1,7 @@
-exports.register = async (req,res) => {
+// ./controllers/usersController.js
 
-    res.send("Estoy en la ruta users")
+exports.profile = async (req,res) => {
+
+	res.render("users/profile")
 
 }

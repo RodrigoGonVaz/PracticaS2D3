@@ -1,14 +1,18 @@
-//1. IMPORTACIONES
-const express           =require("express")
-const router            = express.Router()
+// ./routes/users.js
+//1. IMPORTACION
+const express		= require("express")
+const router		= express.Router()
 
-const usersController    =require("./../controllers/users.Controller")  
+const usersController	= require("./../controllers/users.Controller")
+
+const routeGuard = require("./../middlewares/route-guard")
+console.log("El route Guard importado es:", routeGuard.usuarioLoggeado) //<--[Function: usuarioLoggeado]
+
+//2. RUTEO
+//Tan pronto el routeGuard.usuarioLoggeado encuentre un next pasa a 👇  la sigueinte funcion
+router.get("/profile", routeGuard.usuarioLoggeado ,usersController.profile)
 
 
-//CREAR
-//Crear Libro VISTA (Para el formulariio)
-router.get("/", usersController.register)
 
 
-// 3. Exportaciones
 module.exports = router
